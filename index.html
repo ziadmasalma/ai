@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERPMax ChatBot Demo</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Mock Frappe framework functions
+        window.frappe = {
+            provide: function(namespace) {
+                if (!window[namespace.split('.')[0]]) {
+                    window[namespace.split('.')[0]] = {};
+                }
+                let parts = namespace.split('.');
+                let current = window;
+                for (let part of parts) {
+                    if (!current[part]) {
+                        current[part] = {};
+                    }
+                    current = current[part];
+                }
+            },
+            ui: {
+                Dialog: function(options) {
+                    this.options = options;
+                    this.show = function() {
+                        // Simple mock: create a div overlay
+                        let overlay = document.createElement('div');
+                        overlay.style.position = 'fixed';
+                        overlay.style.top = '0';
+                        overlay.style.left = '0';
+                        overlay.style.width = '100%';
+                        overlay.style.height = '100%';
+                        overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                        overlay.style.zIndex = '1000';
+                        overlay.style.display = 'flex';
+                        overlay.style.alignItems = 'center';
+                        overlay.style.justifyContent = 'center';
+
+                        let dialog = document.createElement('div');
+                        dialog.style.backgroundColor = 'white';
+                        dialog.style.padding = '20px';
+                        dialog.style.borderRadius = '8px';
+                        dialog.style.maxWidth = '600px';
+                        dialog.style.width = '90%';
+                        dialog.innerHTML = `
+                            <h3>${options.title}</h3>
+                            <div id="chat-container"></div>
+                            <button id="close-btn" style="margin-top: 10px;">Close</button>
+                        `;
+                        overlay.appendChild(dialog);
+                        document.body.appendChild(overlay);
+
+                        // Attach close event
+                        document.getElementById('close-btn').addEventListener('click', () => {
+                            document.body.removeChild(overlay);
+                        });
+
+                        this.fields_dict = {
+                            chat_container: {
+                                $wrapper: $('#chat-container')
+                            }
+                        };
+                        this.$wrapper = $(overlay);
+                    };
+                    this.hide = function() {
+                        // Mock hide
+                    };
+                }
+            },
+            utils: {
+                escape_html: function(text) {
+                    return text.replace(/[&<>"']/g, function(match) {
+                        const map = {
+                            '&': '&amp;',
+                            '<': '<',
+                            '>': '>',
+                            '"': '"',
+                            "'": '&#039;'
+                        };
+                        return map[match];
+                    });
+                }
+            },
+            boot: {
+                user: {
+                    name: 'TestUser'
+                }
+            }
+        };
+
+        // Mock __ function for translation
+        window.__ = function(text) {
+            return text;
+        };
+    </script>
+</head>
+<body>
+    <h1>ERPMax ChatBot Demo</h1>
+    <button id="open-chat">Open ChatBot</button>
+
+    <script src="AI.js"></script>
+    <script>
+        // Trigger the chatbot on button click
+        document.getElementById('open-chat').addEventListener('click', function() {
+            erpmax.chatbot.show();
+        });
+    </script>
+</body>
+</html>
